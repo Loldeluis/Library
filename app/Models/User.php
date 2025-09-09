@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+//ROLES 
 
     public function esAdministrador() {
     return $this->rol === 'administrador';
@@ -19,8 +20,6 @@ class User extends Authenticatable
 public function esDocente() {
     return $this->rol === 'docente';
 }
-
-
 
 
     /**
