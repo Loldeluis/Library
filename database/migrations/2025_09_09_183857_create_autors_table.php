@@ -13,9 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('autors', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('Libro_autor', function (Blueprint $table) {
+        $table->unsignedBigInteger('libro_id');
+        $table->unsignedBigInteger('autor_id');
+
+        $table->primary(['libro_id','autor_id']);
+
+        $table->foreign('libro_id')
+              ->references('id')->on('libros')
+              ->onDelete('cascade');
+
+        $table->foreign('autor_id')
+              ->references('id')->on('autores')
+              ->onDelete('cascade');
+
         });
     }
 

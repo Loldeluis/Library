@@ -7,5 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ejemplar extends Model
 {
-    use HasFactory;
+    public function libro() {
+        return $this->belongsTo(Libro::class, 'libro_id');
+    }
+
 }
