@@ -13,7 +13,7 @@ class BookRegistrationController extends Controller
 {
     public function create()
     {
-        dd('llegó a create()');
+
         return view('books.create');
     }
 

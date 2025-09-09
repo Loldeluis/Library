@@ -9,27 +9,41 @@ class BookLookupController extends Controller
 {
     public function __construct(private GoogleBooks $google) {}
 
-    public function byIsbn(string $isbn)
-    {
-        $key = 'gbooks:isbn:' . $isbn;
+public function byIsbn(string $isbn)
+{
+    $key = 'gbooks:isbn:' . $isbn;
 
+    try {
         $raw = Cache::remember($key, now()->addHours(6), function () use ($isbn) {
             return $this->google->searchByIsbn($isbn);
         });
-        
-        if(!empty($raw['error'])) {
-            return response()->json(['message' => 'Error consultando Google Books', 'detail' => $raw], 502);
-        }
-
-        $items = collect($raw['items'] ?? []) -> map(fn($i) => $this->google->mapVolumeToBook($i))->values();
-
+    } catch (\Throwable $e) {
         return response()->json([
-            'query' => ['isbn' => $isbn],
-            'count' => $items->count(),
-            'results' => $items,
-
-        ]);
+            'message' => 'Excepción consultando Google Books',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+
+    // Si la respuesta trae un error controlado desde el servicio
+    if (!empty($raw['error'])) {
+        return response()->json([
+            'message' => 'Error consultando Google Books',
+            'detail'  => $raw
+        ], 502);
+    }
+
+    // Aseguramos que siempre sea un array
+    $items = collect($raw['items'] ?? [])
+        ->map(fn($i) => $this->google->mapVolumeToBook($i))
+        ->values();
+
+    return response()->json([
+        'query'   => ['isbn' => $isbn],
+        'count'   => $items->count(),
+        'results' => $items,
+    ]);
+}
+
 
 public function search(Request $request)
 {

@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookLookupController;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,6 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/books/isbn/{isbn}', [BookLookupController::class, 'byIsbn']);
+Route::get('books/isbn/{isbn}', [BookLookupController::class, 'byIsbn']);
 Route::get('/books/search', [BookLookupController::class, 'search']);
 

@@ -10,29 +10,33 @@ class GoogleBooks
 {
 
 protected string $baseUrl = 'https://www.googleapis.com/books/v1';
-protected ?string $apiKey;
+protected ?string $apiKey = null;
 
-public function _construct()
+public function __construct()
 {
     $this->apiKey = config('services.google.books_key');
 }
 
-public function searchByIsbn(string $rawIsbn): array
+public function searchByIsbn(string $isbn): array
 {
-    $isbn = $this->normalizeIsbn($rawIsbn);
+    $params = ['q' => "isbn:{$isbn}"];
+    if (!empty($this->apiKey)) {
+        $params['key'] = $this->apiKey;
+    }
 
-$response = Http::baseUrl($this->baseUrl)->get('volumens', [
+    $response = Http::baseUrl($this->baseUrl)->get('volumes', $params);
 
-      'q'   => "isbn:{$isbn}",
-       'key' => $this->apiKey,
-]);
+    if ($response->failed()) {
+        return [
+            'items'  => [],
+            'error'  => 'google_books_request_failed',
+            'status' => $response->status()
+        ];
+    }
 
-        if ($response->failed()) {
-            return ['items' => [], 'error' => 'google_books_request_failed', 'status' => $response->status()];
-        }
-        
-        return $response->json() ?? ['items' => []];
+    return $response->json() ?? ['items' => []];
 }
+
 
 public function searchByText(string $query, int $max = 10 ): array 
 {
