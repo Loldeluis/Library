@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookRegistrationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('books/create', [BookRegistrationController::class, 'create'])->name('books.create');
+Route::post('books',       [BookRegistrationController::class, 'store'])->name('books.store');
