@@ -3,6 +3,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookRegistrationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,13 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/admin', [AdminController::class, 'index'])->middleware('rol:administrador');
 
+// RUTAS PARA LIBROS
+
+Route::get('books/create', [BookRegistrationController::class, 'create'])->name('books.create');
+Route::post('books',       [BookRegistrationController::class, 'store'])->name('books.store');
+
+
 });
+
 
 
