@@ -110,6 +110,66 @@
       max-width: 400px;
       margin: 1rem auto;
     }
+    /* Modal overlay */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+/* Mostrar modal */
+.modal.show {
+  display: flex;
+}
+
+/* Caja del contenido */
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 1.5rem;
+}
+
+/* Botón cerrar */
+.modal-close {
+  position: absolute;
+  top: .5rem; right: .75rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Imagen en modal */
+.modal-content img {
+  width: 150px;
+  float: left;
+  margin-right: 1rem;
+  border-radius: 4px;
+}
+
+/* Información textual */
+.modal-info {
+  overflow: hidden;
+}
+.modal-info h2 {
+  margin-top: 0;
+}
+.modal-info p {
+  margin: .5rem 0;
+  line-height: 1.4;
+}
+
   </style>
 
   @yield('styles')
