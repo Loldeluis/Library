@@ -17,11 +17,15 @@
         </div>
     </div>
     
-        @if (session('status') === 'profile-updated')
-    <div class="mb-4 p-3 bg-green-100 text-green-800 rounded">
-        Perfil actualizado correctamente.
+@if (session('status') === 'profile-updated')
+    <div class="mb-4 p-3 
+                bg-green-100 text-green-800 
+                dark:bg-green-800 dark:text-green-100 
+                rounded shadow">
+        ✅ Perfil actualizado correctamente.
     </div>
 @endif
+
 
 </x-app-layout>
 

@@ -31,6 +31,7 @@ public function esDocente() {
         'name',
         'email',
         'password',
+        'rol',
     ];
 
     /**
