@@ -27,9 +27,11 @@ return new class extends Migration
         $table->unsignedBigInteger('id_editorial');
         $table->timestamps();
 
-        $table->foreign('id_editorial')
-              ->references('id')->on('editoriales')
-              ->onDelete('restrict');
+              
+        //$table->foreign('id_editorial')
+             
+        //->references('id')->on('editorials')
+           //   ->onDelete('restrict');
 
         });
     }
