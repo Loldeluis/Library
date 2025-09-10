@@ -34,7 +34,18 @@
         <h3>Sinopsis</h3>
         <p id="modal-description"></p>
       </div>
+      <div class="modal-footer" style="clear: both; margin-top: 1rem;">
+  <label for="modal-quantity">Cantidad:</label>
+  <input type="number"
+         id="modal-quantity"
+         min="1"
+         value="1"
+         style="width: 4rem; margin: 0 .5rem;">
+  <button id="modal-save-btn" class="btn">Guardar</button>
+</div>
+
     </div>
+    
   </div>
 @endsection
 
