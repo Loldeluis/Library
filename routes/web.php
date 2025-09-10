@@ -44,6 +44,9 @@ Route::get('/admin', [AdminController::class, 'index'])->middleware('rol:adminis
 Route::get('books/create', [BookRegistrationController::class, 'create'])->name('books.create');
 Route::post('books',       [BookRegistrationController::class, 'store'])->name('books.store');
 
+Route::get('books', [BookRegistrationController::class, 'index'])
+     ->name('books.index');
+
 
 });
 
