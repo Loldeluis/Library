@@ -73,7 +73,88 @@ public function search(Request $request)
         'result' => $items,
     ]);
   }
+
+public function byQuery(Request $request)
+{
+    $q   = $request->string('q')->trim();
+    $max = $request->integer('max', 20);
+
+    // 1. Si parecen solo dígitos (10–13), lo tratamos como ISBN
+    if (preg_match('/^\d{10,13}$/', $q)) {
+        // a) Primero intentamos Google Books con searchByIsbn
+        $raw = Cache::remember("gbooks:isbn:{$q}", now()->addHours(6), fn() =>
+            $this->google->searchByIsbn($q)
+        );
+
+        $items = collect($raw['items'] ?? [])->map(fn($i) =>
+            $this->google->mapVolumeToBook($i)
+        )->values();
+
+        if ($items->isNotEmpty()) {
+            return response()->json([
+                'source'  => 'google_isbn',
+                'query'   => ['isbn' => $q],
+                'count'   => $items->count(),
+                'results' => $items,
+            ]);
+        }
+
+        // b) Si Google no lo tiene, buscamos en tu BD local
+        $local = Libro::with('autores','editorial')
+                      ->where('isbn', $q)
+                      ->get()
+                      ->map(fn($libro) => [
+                          'titulo'         => $libro->titulo,
+                          'autores'        => $libro->autores->pluck('nombre_completo')->toArray(),
+                          'editorial'      => $libro->editorial->nombre,
+                          'portada_medium' => $libro->portada_medium,
+                      ]);
+
+        if ($local->isNotEmpty()) {
+            return response()->json([
+                'source'  => 'local_db',
+                'query'   => ['isbn' => $q],
+                'count'   => $local->count(),
+                'results' => $local,
+            ]);
+        }
+
+        // c) Finalmente devolvemos empty
+        return response()->json([
+            'source'  => 'none',
+            'query'   => ['isbn' => $q],
+            'count'   => 0,
+            'results' => [],
+        ]);
+    }
+
+    // 2. Caso general de búsqueda por texto
+    $cacheKey = 'gbooks:search:' . md5($q . '|' . $max);
+
+    $raw = Cache::remember($cacheKey, now()->addHours(6), fn() =>
+        $this->google->search($q, $max)
+    );
+
+    if (!empty($raw['error'])) {
+        return response()->json(['message'=>'Error Google Books','detail'=>$raw], 502);
+    }
+
+    $items = collect($raw['items'] ?? [])->map(fn($i)=>
+        $this->google->mapVolumeToBook($i)
+    )->values();
+
+    return response()->json([
+        'source'  => 'google_text',
+        'query'   => ['q'=>$q,'max'=>$max],
+        'count'   => $items->count(),
+        'results' => $items,
+    ]);
 }
+
+
+
+}
+
 
 
 

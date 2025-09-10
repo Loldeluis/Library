@@ -1,140 +1,76 @@
 @extends('layouts.app_library')
 
-@section('title', 'Registrar Libro')
-
+@section('title', 'Buscar Libros')
+  
 @section('content')
-  <h1>Registrar Libro</h1>
+  <h1>Buscar Libros</h1>
 
-  @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-  @endif
+  <div class="form-group" style="max-width:400px;margin:auto;display:flex;gap:.5rem;">
+    <input
+      type="text"
+      id="search-input"
+      class="form-control"
+      placeholder="ISBN, título, autor..."
+    >
+    <button id="search-btn" class="btn">Buscar</button>
+  </div>
 
-  <form id="book-form" method="POST" action="{{ route('books.store') }}">
-    @csrf
-
-    {{-- ISBN + botón de búsqueda --}}
-    <div class="form-group">
-      <label for="isbn-input">ISBN</label>
-      <div class="input-with-button">
-        <input
-          type="text"
-          name="isbn"
-          id="isbn-input"
-          class="form-control"
-          value="{{ old('isbn') }}"
-        >
-        <button type="button" id="fetch-btn" class="btn">Buscar</button>
-      </div>
-      @error('isbn')
-        <small class="text-danger">{{ $message }}</small>
-      @enderror
-    </div>
-
-    {{-- Título --}}
-    <div class="form-group">
-      <label for="titulo">Título</label>
-      <input
-        type="text"
-        name="titulo"
-        id="titulo"
-        class="form-control"
-        value="{{ old('titulo') }}"
-      >
-      @error('titulo')
-        <small class="text-danger">{{ $message }}</small>
-      @enderror
-    </div>
-
-    {{-- Editorial --}}
-    <div class="form-group">
-      <label for="editorial">Editorial</label>
-      <input
-        type="text"
-        name="editorial"
-        id="editorial"
-        class="form-control"
-        value="{{ old('editorial') }}"
-      >
-      @error('editorial')
-        <small class="text-danger">{{ $message }}</small>
-      @enderror
-    </div>
-
-    {{-- Autor(es) --}}
-    <div class="form-group">
-      <label for="autor-0">Autor(es)</label>
-      <input
-        type="text"
-        name="autores[0]"
-        id="autor-0"
-        class="form-control"
-        value="{{ old('autores.0') }}"
-      >
-      @error('autores.0')
-        <small class="text-danger">{{ $message }}</small>
-      @enderror
-    </div>
-
-    {{-- Aquí puedes agregar más campos de tu StoreBookRequest --}}
-    <button type="submit" class="btn">Guardar</button>
-  </form>
-
-  {{-- Vista previa dinámica --}}
-  <div class="books-grid" id="book-preview"></div>
+  <div class="books-grid" id="search-results" style="margin-top:1.5rem;"></div>
 @endsection
 
 @section('scripts')
 <script>
-  document.getElementById('fetch-btn').addEventListener('click', async () => {
-    const isbn = document.getElementById('isbn-input').value.trim();
-    if (!isbn) {
-      alert('Por favor ingresa un ISBN.');
-      return;
-    }
+  const container = document.getElementById('search-results');
+  const btn       = document.getElementById('search-btn');
+  const input     = document.getElementById('search-input');
+
+  btn.addEventListener('click', async () => {
+    const q = input.value.trim();
+    if (!q) return;
+
+    // Limpia resultados previos
+    container.innerHTML = '';
 
     try {
-      const res = await fetch(`/api/books/isbn/${isbn}`, {
-        headers: { 'Accept': 'application/json' }
-      });
+      // Definimos res aquí y lo usamos en todo el bloque
+      const res = await fetch(
+        `/books/query?q=${encodeURIComponent(q)}`, 
+        { headers: { 'Accept': 'application/json' } }
+      );
 
       if (!res.ok) {
-        console.error(await res.text());
-        return alert('Error al buscar el libro. Revisa la consola.');
+        const errorText = await res.text();
+        console.error(`Error ${res.status}:`, errorText);
+        container.innerHTML = `<p>Error ${res.status} al buscar.</p>`;
+        return;
       }
 
       const { count, results } = await res.json();
-      const preview = document.getElementById('book-preview');
-      preview.innerHTML = '';
 
-      if (count > 0) {
-        const book = results[0];
+      if (!count) {
+        container.innerHTML = `<p>No se encontraron resultados para “${q}”.</p>`;
+        return;
+      }
 
-        // Rellenar el formulario
-        document.getElementById('titulo').value     = book.titulo    || '';
-        document.getElementById('editorial').value  = book.editorial || '';
-        document.getElementById('autor-0').value    = Array.isArray(book.autores)
-          ? book.autores.join(', ')
-          : '';
-
-        // Construir la tarjeta de preview
+      // Renderizamos cada tarjeta
+      results.forEach(book => {
         const card = document.createElement('div');
         card.className = 'book-card';
         card.innerHTML = `
           <img
-            src="${book.portada_medium || asset('images/placeholder.png')}"
+            src="${book.portada_medium || '/images/placeholder.png'}"
             alt="Portada ${book.titulo}"
             loading="lazy"
           >
           <h3>${book.titulo}</h3>
           <p>${Array.isArray(book.autores) ? book.autores.join(', ') : ''}</p>
         `;
-        preview.append(card);
-      } else {
-        preview.innerHTML = '<p>No se encontró el libro en Google Books.</p>';
-      }
+        container.appendChild(card);
+      });
+
     } catch (err) {
       console.error(err);
-      alert('Error de conexión o respuesta inválida.');
+      container.innerHTML = '<p>Error de conexión o respuesta inválida.</p>';
     }
   });
 </script>
