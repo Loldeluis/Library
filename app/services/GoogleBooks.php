@@ -37,6 +37,31 @@ public function searchByIsbn(string $isbn): array
     return $response->json() ?? ['items' => []];
 }
 
+public function search(string $query, int $maxResults = 20): array
+{
+    $params = [
+      'q'          => $query,
+      'maxResults' => $maxResults,
+    ];
+
+    if (!empty($this->apiKey)) {
+        $params['key'] = $this->apiKey;
+    }
+
+    $response = Http::baseUrl($this->baseUrl)
+                    ->get('volumes', $params);
+
+    if ($response->failed()) {
+        return [
+            'items'  => [],
+            'error'  => 'google_books_request_failed',
+            'status' => $response->status(),
+        ];
+    }
+
+    return $response->json() ?? ['items' => []];
+}
+
 
 public function searchByText(string $query, int $max = 10 ): array 
 {

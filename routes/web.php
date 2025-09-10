@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookRegistrationController;
 
+use App\Http\Controllers\BookLookupController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -51,6 +53,15 @@ Route::get('/', function () {
 
     Route::get('books/create', [BookRegistrationController::class, 'create'])->name('books.create');
     Route::post('books',       [BookRegistrationController::class, 'store'])->name('books.store');
+
+Route::get('books', [BookRegistrationController::class, 'index'])
+     ->name('books.index');
+
+Route::get('books/query', [BookLookupController::class, 'byQuery'])
+     ->name('books.query');
+
+
+
 
 
 });
